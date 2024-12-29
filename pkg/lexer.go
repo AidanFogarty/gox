@@ -76,6 +76,9 @@ func (l *Lexer) Lex() {
 		case '\n':
 			l.Line++
 
+		case '"':
+			l.string()
+
 		case '/':
 			// Handle comments as the division operator and comments share the same start character
 			if l.peek() == '/' {
@@ -134,4 +137,24 @@ func (l *Lexer) peek() rune {
 	}
 
 	return r
+}
+
+func (l *Lexer) string() {
+	for l.peek() != '"' && l.peek() != 0 {
+		if l.peek() == '\n' {
+			l.Line++
+		}
+
+		l.advance()
+	}
+
+	if l.peek() == 0 {
+		fmt.Println("error: unterminated string")
+		return
+	}
+
+	l.advance() // handle the closing quote
+
+	content := l.Source[l.Start+1 : l.Current-1]
+	l.addToken(String, content, content)
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"unicode"
 )
 
 type Lexer struct {
@@ -91,6 +92,14 @@ func (l *Lexer) Lex() {
 			}
 
 		default:
+			if unicode.IsDigit(r) {
+				l.number()
+				break
+			} else if unicode.IsLetter(r) {
+				l.identifier()
+				break
+			}
+
 			fmt.Println("unknown character: ", string(r))
 		}
 	}
@@ -139,6 +148,10 @@ func (l *Lexer) peek() rune {
 	return r
 }
 
+func (l *Lexer) isAlphaNumeric(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsDigit(r)
+}
+
 func (l *Lexer) string() {
 	for l.peek() != '"' && l.peek() != 0 {
 		if l.peek() == '\n' {
@@ -157,4 +170,34 @@ func (l *Lexer) string() {
 
 	content := l.Source[l.Start+1 : l.Current-1]
 	l.addToken(String, content, content)
+}
+
+func (l *Lexer) number() {
+	for unicode.IsDigit(l.peek()) {
+		l.advance()
+	}
+
+	if l.peek() == '.' {
+		l.advance()
+
+		for unicode.IsDigit(l.peek()) {
+			l.advance()
+		}
+	}
+
+	l.addToken(Number, l.Source[l.Start:l.Current], l.Source[l.Start:l.Current])
+}
+
+func (l *Lexer) identifier() {
+	for l.isAlphaNumeric(l.peek()) {
+		l.advance()
+	}
+
+	identifier := l.Source[l.Start:l.Current]
+	tok, err := LookupKeyword(identifier)
+	if err == nil {
+		l.addToken(tok, identifier, nil)
+	} else {
+		l.addToken(Identifier, identifier, nil)
+	}
 }

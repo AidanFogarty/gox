@@ -68,3 +68,30 @@ func NewToken(t TokenType, lexeme string, literal interface{}, line int) *Token 
 func (t Token) String() string {
 	return fmt.Sprintf("%d %s", t.Type, t.Lexeme)
 }
+
+var keywords = map[string]TokenType{
+	"and":    And,
+	"class":  Class,
+	"else":   Else,
+	"false":  False,
+	"for":    For,
+	"fun":    Fun,
+	"if":     If,
+	"nil":    Nil,
+	"or":     Or,
+	"print":  Print,
+	"return": Return,
+	"super":  Super,
+	"this":   This,
+	"true":   True,
+	"var":    Var,
+	"while":  While,
+}
+
+func LookupKeyword(keyword string) (TokenType, error) {
+	if tok, ok := keywords[keyword]; ok {
+		return tok, nil
+	}
+
+	return TokenEOF, fmt.Errorf("unknown keyword: %s", keyword)
+}

@@ -14,12 +14,28 @@ func main() {
 		fmt.Println("Usage: gox [script]")
 		os.Exit(1)
 	} else if len(os.Args) == 2 {
-		scriptPath, err := filepath.Abs(os.Args[1])
-		if err != nil {
-			fmt.Println("error: unable to get absolute path")
-			os.Exit(1)
+		if os.Args[1] == "expr" {
+			expr := gox.NewBinary(
+				gox.NewUnary(
+					gox.NewToken(gox.Minus, "-", nil, 1),
+					gox.NewLiteral(123),
+				),
+				gox.NewToken(gox.Star, "*", nil, 1),
+				gox.NewGrouping(
+					gox.NewLiteral(45.67),
+				),
+			)
+
+			printer := gox.NewAstPrinter()
+			fmt.Println(expr.Accept(printer))
+		} else {
+			scriptPath, err := filepath.Abs(os.Args[1])
+			if err != nil {
+				fmt.Println("error: unable to get absolute path")
+				os.Exit(1)
+			}
+			runFile(scriptPath)
 		}
-		runFile(scriptPath)
 	} else {
 		runPrompt()
 	}

@@ -18,11 +18,16 @@ test:
 fmt:
 	go fmt ./...
 
+## vet: Run the vet tool on all Go code in the project
 vet:
 	go vet ./...
 
 ## ci: Run linter, formatter and tests
 ci: build fmt vet test
+
+## generate_ast: Generate the AST in the given directory
+generate_ast:
+	go run tools/generate_ast.go ./pkg
 
 # Thanks to: https://github.com/azer/go-makefile-example
 .PHONY: help

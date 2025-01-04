@@ -68,7 +68,12 @@ func run(code string) {
 	lexer := gox.NewLexer(code)
 	lexer.Lex()
 
-	for _, token := range lexer.Tokens {
-		fmt.Println(token)
+	parser := gox.NewParser(lexer.Tokens)
+	expr, err := parser.Parse()
+	if err != nil {
+		fmt.Println(err)
 	}
+
+	printer := gox.NewAstPrinter()
+	fmt.Println(expr.Accept(printer))
 }
